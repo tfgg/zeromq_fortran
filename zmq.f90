@@ -137,7 +137,7 @@ module zmq
     end function zmq_msg_init_data
 
     ! int zmq_msg_send (zmq_msg_t *msg, void *s, int flags);
-    function zmq_msg_send(msg, flags) bind(c)
+    function zmq_msg_send(msg, s, flags) bind(c)
       use :: iso_c_binding
 
       integer(c_int) :: zmq_msg_send
@@ -220,7 +220,7 @@ module zmq
 
       integer(c_int) :: zmq_msg_get
       type(c_ptr), value :: msg
-      type(c_int), value :: option
+      integer(c_int), value :: option
 
     end function zmq_msg_get
 
@@ -296,7 +296,7 @@ module zmq
 
       integer(c_int) :: zmq_connect
       type(c_ptr), value :: s
-      type(c_ptr), value :: addr
+      character(kind=c_char) :: addr(*)
 
     end function zmq_connect
 
@@ -385,7 +385,7 @@ module zmq
       type(c_ptr), value :: msg
       integer(c_int), value :: flags
 
-    end function zmq_recv_msg
+    end function zmq_recvmsg
 
     ! int zmq_sendiov (void *s, struct iovec *iov, size_t count, int flags);
     function zmq_sendiov(s, iov, count, flags) bind(c)
@@ -442,41 +442,128 @@ module zmq
 
   end interface
 
+  integer, parameter :: ZMQ_VERSION_MAJOR=3, ZMQ_VERSION_MINOR=3, ZMQ_VERSION_PATCH=0
+  !integer, parameter :: ZMQ_VERSION=ZMQ_VERSION_MAJOR*10000 + ZMQ_VERSION_MINOR*100 + ZMQ_VERSION_PATCH
+
+  integer, parameter :: ZMQ_HAUSNUMERO=156384712
+
+  integer, parameter :: ENOTSUP = (ZMQ_HAUSNUMERO + 1)
+  integer, parameter :: EPROTONOSUPPORT = (ZMQ_HAUSNUMERO + 2)
+  integer, parameter :: ENOBUFS = (ZMQ_HAUSNUMERO + 3)
+  integer, parameter :: ENETDOWN = (ZMQ_HAUSNUMERO + 4)
+  integer, parameter :: EADDRINUSE = (ZMQ_HAUSNUMERO + 5)
+  integer, parameter :: EADDRNOTAVAIL = (ZMQ_HAUSNUMERO + 6)
+  integer, parameter :: ECONNREFUSED = (ZMQ_HAUSNUMERO + 7)
+  integer, parameter :: EINPROGRESS = (ZMQ_HAUSNUMERO + 8)
+  integer, parameter :: ENOTSOCK = (ZMQ_HAUSNUMERO + 9)
+  integer, parameter :: EMSGSIZE = (ZMQ_HAUSNUMERO + 10)
+  integer, parameter :: EAFNOSUPPORT = (ZMQ_HAUSNUMERO + 11)
+  integer, parameter :: ENETUNREACH = (ZMQ_HAUSNUMERO + 12)
+  integer, parameter :: ECONNABORTED = (ZMQ_HAUSNUMERO + 13)
+  integer, parameter :: ECONNRESET = (ZMQ_HAUSNUMERO + 14)
+  integer, parameter :: ENOTCONN = (ZMQ_HAUSNUMERO + 15)
+  integer, parameter :: ETIMEDOUT = (ZMQ_HAUSNUMERO + 16)
+  integer, parameter :: EHOSTUNREACH = (ZMQ_HAUSNUMERO + 17)
+  integer, parameter :: ENETRESET = (ZMQ_HAUSNUMERO + 18)
+  integer, parameter :: EFSM = (ZMQ_HAUSNUMERO + 51)
+  integer, parameter :: ENOCOMPATPROTO = (ZMQ_HAUSNUMERO + 52)
+  integer, parameter :: ETERM = (ZMQ_HAUSNUMERO + 53)
+  integer, parameter :: EMTHREAD = (ZMQ_HAUSNUMERO + 54)
+
+  integer, parameter :: ZMQ_IO_THREADS = 1
+  integer, parameter :: ZMQ_MAX_SOCKETS = 2
+  integer, parameter :: ZMQ_IO_THREADS_DFLT = 1
+  integer, parameter :: ZMQ_MAX_SOCKETS_DFLT = 1024
+  integer, parameter :: ZMQ_PAIR = 0
+  integer, parameter :: ZMQ_PUB = 1
+  integer, parameter :: ZMQ_SUB = 2
+  integer, parameter :: ZMQ_REQ = 3
+  integer, parameter :: ZMQ_REP = 4
+  integer, parameter :: ZMQ_DEALER = 5
+  integer, parameter :: ZMQ_ROUTER = 6
+  integer, parameter :: ZMQ_PULL = 7
+  integer, parameter :: ZMQ_PUSH = 8
+  integer, parameter :: ZMQ_XPUB = 9
+  integer, parameter :: ZMQ_XSUB = 10
+  integer, parameter :: ZMQ_STREAM = 11
+  integer, parameter :: ZMQ_XREQ = ZMQ_DEALER
+  integer, parameter :: ZMQ_XREP = ZMQ_ROUTER
+  integer, parameter :: ZMQ_AFFINITY = 4
+  integer, parameter :: ZMQ_IDENTITY = 5
+  integer, parameter :: ZMQ_SUBSCRIBE = 6
+  integer, parameter :: ZMQ_UNSUBSCRIBE = 7
+  integer, parameter :: ZMQ_RATE = 8
+  integer, parameter :: ZMQ_RECOVERY_IVL = 9
+  integer, parameter :: ZMQ_SNDBUF = 11
+  integer, parameter :: ZMQ_RCVBUF = 12
+  integer, parameter :: ZMQ_RCVMORE = 13
+  integer, parameter :: ZMQ_FD = 14
+  integer, parameter :: ZMQ_EVENTS = 15
+  integer, parameter :: ZMQ_TYPE = 16
+  integer, parameter :: ZMQ_LINGER = 17
+  integer, parameter :: ZMQ_RECONNECT_IVL = 18
+  integer, parameter :: ZMQ_BACKLOG = 19
+  integer, parameter :: ZMQ_RECONNECT_IVL_MAX = 21
+  integer, parameter :: ZMQ_MAXMSGSIZE = 22
+  integer, parameter :: ZMQ_SNDHWM = 23
+  integer, parameter :: ZMQ_RCVHWM = 24
+  integer, parameter :: ZMQ_MULTICAST_HOPS = 25
+  integer, parameter :: ZMQ_RCVTIMEO = 27
+  integer, parameter :: ZMQ_SNDTIMEO = 28
+  integer, parameter :: ZMQ_LAST_ENDPOINT = 32
+  integer, parameter :: ZMQ_ROUTER_MANDATORY =  33
+  integer, parameter :: ZMQ_TCP_KEEPALIVE = 34
+  integer, parameter :: ZMQ_TCP_KEEPALIVE_CNT = 35
+  integer, parameter :: ZMQ_TCP_KEEPALIVE_IDLE = 36
+  integer, parameter :: ZMQ_TCP_KEEPALIVE_INTVL = 37
+  integer, parameter :: ZMQ_TCP_ACCEPT_FILTER = 38
+  integer, parameter :: ZMQ_IMMEDIATE = 39
+  integer, parameter :: ZMQ_XPUB_VERBOSE = 40
+  integer, parameter :: ZMQ_ROUTER_RAW = 41
+  integer, parameter :: ZMQ_IPV6 = 42
+  integer, parameter :: ZMQ_MECHANISM = 43
+  integer, parameter :: ZMQ_PLAIN_SERVER = 44
+  integer, parameter :: ZMQ_PLAIN_USERNAME = 45
+  integer, parameter :: ZMQ_PLAIN_PASSWORD = 46
+  integer, parameter :: ZMQ_CURVE_SERVER = 47
+  integer, parameter :: ZMQ_CURVE_PUBLICKEY = 48
+  integer, parameter :: ZMQ_CURVE_SECRETKEY = 49
+  integer, parameter :: ZMQ_CURVE_SERVERKEY = 50
+  integer, parameter :: ZMQ_PROBE_ROUTER = 51
+  integer, parameter :: ZMQ_REQ_REQUEST_IDS = 52
+  integer, parameter :: ZMQ_REQ_STRICT = 53
+  integer, parameter :: ZMQ_CONFLATE = 54
+  integer, parameter :: ZMQ_ZAP_DOMAIN = 55
+  integer, parameter :: ZMQ_MORE = 1
+  integer, parameter :: ZMQ_DONTWAIT = 1
+  integer, parameter :: ZMQ_SNDMORE = 2
+  integer, parameter :: ZMQ_NULL = 0
+  integer, parameter :: ZMQ_PLAIN = 1
+  integer, parameter :: ZMQ_CURVE = 2
+  integer, parameter :: ZMQ_IPV4ONLY = 31
+  integer, parameter :: ZMQ_DELAY_ATTACH_ON_CONNECT = ZMQ_IMMEDIATE
+  integer, parameter :: ZMQ_NOBLOCK = ZMQ_DONTWAIT
+  integer, parameter :: ZMQ_FAIL_UNROUTABLE = ZMQ_ROUTER_MANDATORY
+  integer, parameter :: ZMQ_ROUTER_BEHAVIOR = ZMQ_ROUTER_MANDATORY
+  integer, parameter :: ZMQ_EVENT_CONNECTED = 1
+  integer, parameter :: ZMQ_EVENT_CONNECT_DELAYED = 2
+  integer, parameter :: ZMQ_EVENT_CONNECT_RETRIED = 4
+  integer, parameter :: ZMQ_EVENT_LISTENING = 8
+  integer, parameter :: ZMQ_EVENT_BIND_FAILED = 16
+  integer, parameter :: ZMQ_EVENT_ACCEPTED = 32
+  integer, parameter :: ZMQ_EVENT_ACCEPT_FAILED = 64
+  integer, parameter :: ZMQ_EVENT_CLOSED = 128
+  integer, parameter :: ZMQ_EVENT_CLOSE_FAILED = 256
+  integer, parameter :: ZMQ_EVENT_DISCONNECTED = 512
+  integer, parameter :: ZMQ_EVENT_MONITOR_STOPPED = 1024
+!  integer, parameter :: ZMQ_EVENT_ALL ( ZMQ_EVENT_CONNECTED | ZMQ_EVENT_CONNECT_DELAYED | \
+  integer, parameter :: ZMQ_POLLIN = 1
+  integer, parameter :: ZMQ_POLLOUT = 2
+  integer, parameter :: ZMQ_POLLERR = 4
+  integer, parameter :: ZMQ_POLLITEMS_DFLT = 16
+  integer, parameter :: ZMQ_STREAMER = 1
+  integer, parameter :: ZMQ_FORWARDER = 2
+  integer, parameter :: ZMQ_QUEUE = 3
+
 end module zmq
 
-program f
-  use :: iso_c_binding
-  use zmq, only : zmq_ctx_new, zmq_socket, zmq_bind,&
-    zmq_send, zmq_recv
-  
-  implicit none
-
-  type(c_ptr) :: context, responder
-  integer(c_int) :: rc, err
-  integer(c_int) :: ZMQ_REP = 4
-  character(kind=c_char) :: recv_buffer(256)
-  character(kind=c_char) :: send_buffer(256)
-  type(c_ptr) :: send_buf, recv_buf
-  
-  send_buf = c_loc(send_buffer)
-  recv_buf = c_loc(recv_buffer)
-
-  context = zmq_ctx_new()
-  responder = zmq_socket(context, ZMQ_REP)
-  rc = zmq_bind(responder, "tcp://*:6789")
-
-  if(rc .ne. 0) then
-  
-  end if
-
-  do while (.true.)
-
-    err = zmq_recv(responder, recv_buf, 10, 0)
-    write(*,*) "Received ", recv_buffer
-
-    send_buffer = "Hey"
-    err = zmq_send(responder, send_buf, 3, 0)
-
-  end do
-
-end program f
