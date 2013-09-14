@@ -12,6 +12,9 @@ program test1
   
   integer :: request_nbr
 
+  recv_buffer(:) = char(0)
+  send_buffer(:) = char(0)
+
   context = zmq_ctx_new()
   responder = zmq_socket(context, ZMQ_REP)
   
@@ -22,15 +25,19 @@ program test1
   if(rc .ne. 0) then
     write(*,*) "Could not bind"
   end if
-    
-  send_buffer = "World"
+  
+  send_buffer(1) = "W"
+  send_buffer(2) = "o"
+  send_buffer(3) = "r"
+  send_buffer(4) = "l"
+  send_buffer(5) = "d"
 
   do request_nbr=0,9
 
     err = zmq_recv(responder, c_loc(recv_buffer(1)), 256, 0)
-    write(*,*) "Received Hello" 
-    write(*,*) recv_buffer
+    write(*,*) "Received ", recv_buffer(1:5), request_nbr
 
+    write(*,*) "Sending ", send_buffer(1:5), request_nbr
     err = zmq_send(responder, c_loc(send_buffer(1)), 5, 0)
 
   end do
