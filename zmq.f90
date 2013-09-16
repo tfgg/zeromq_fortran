@@ -565,5 +565,25 @@ module zmq
   integer, parameter :: ZMQ_FORWARDER = 2
   integer, parameter :: ZMQ_QUEUE = 3
 
+  public :: zmq_send_string
+
+contains
+
+  function zmq_send_string(socket, buffer, flags)
+    use :: iso_c_binding
+
+    integer(c_int) :: zmq_send_string
+    type(c_ptr) :: socket
+    character(len=*) :: buffer
+    integer(c_int) :: flags
+    
+    integer(c_size_t) :: length
+
+    length = len(buffer, kind=c_size_t)
+  
+    zmq_send_string = zmq_send(socket, c_loc(buffer), length, flags)
+
+  end function zmq_send_string
+
 end module zmq
 

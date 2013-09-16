@@ -1,7 +1,8 @@
 program test1
   use :: iso_c_binding
   use zmq, only : zmq_ctx_new, zmq_socket, zmq_connect,&
-    zmq_send, zmq_recv, ZMQ_REQ, zmq_close, zmq_ctx_destroy
+    zmq_send, zmq_recv, ZMQ_REQ, zmq_close, zmq_ctx_destroy, &
+    zmq_send_string
   
   implicit none
 
@@ -35,7 +36,7 @@ program test1
   do request_nbr=0,9
 
     write(*,*) "Sending Hello", request_nbr
-    err = zmq_send(requester, c_loc(send_buffer(1)), 5, 0)
+    err = zmq_send_string(requester, "Hello", 0)
 
     err = zmq_recv(requester, c_loc(recv_buffer(1)), 256, 0)
     write(*,*) "Received ", recv_buffer(1:5), request_nbr
